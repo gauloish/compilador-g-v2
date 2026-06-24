@@ -109,7 +109,10 @@ ID [[:alpha:]_][[:alnum:]_]*
 "!="        {return DIFERENTE;}
 "<="        {return MENORIGUAL;}
 ">="        {return MAIORIGUAL;}
+"global"    {return GLOBAL;}
+"funcao"    {return FUNCAO;}
 "principal" {return PRINCIPAL;}
+"retorne"   {return RETORNE;}
 "int"       {return INT;}
 "car"       {return CAR;}
 "leia"      {return LEIA;}
