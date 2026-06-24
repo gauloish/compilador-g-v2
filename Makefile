@@ -1,5 +1,5 @@
 COMPILER = gcc
-NAME = g-v1
+NAME = g-v2
 OBJECTS_DIR = objects
 INCLUDE = -I"include/"
 FILES = memory            \
