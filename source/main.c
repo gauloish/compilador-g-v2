@@ -25,7 +25,7 @@ int main(int argc, char** argv){
     }
     else {
         analysis_error = false;
-        yyerror("Uso correto \"./gv1 <entrada> <saida>\"!!!");
+        yyerror("Uso correto \"./g-v2 <entrada> <saida>\"!!!");
     }
 
     yyin = fopen(argv[1], "r");
