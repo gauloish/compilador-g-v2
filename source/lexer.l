@@ -96,6 +96,8 @@ ID [[:alpha:]_][[:alnum:]_]*
 "}"         {return '}';}
 "("         {return '(';}
 ")"         {return ')';}
+"["         {return '[';}
+"]"         {return ']';}
 ","         {return ',';}
 ";"         {return ';';}
 ":"         {return ':';}
