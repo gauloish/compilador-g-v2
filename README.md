@@ -1,6 +1,6 @@
-# Projeto de Compilador da G-V1
+# Projeto de Compilador da G-V2
 
-O presente projeto implementa o compilador para a linguagem G-V1 da matéria de **Compiladores** usando Flex e Bison para geração automática de analisadores léxico e sintâtico e usando MIPS para geração de código executável.
+O presente projeto implementa o compilador para a linguagem G-V2 da matéria de **Compiladores** usando Flex e Bison para geração automática de analisadores léxico e sintâtico e usando MIPS para geração de código executável.
 
 ## ALunos
 
@@ -35,18 +35,18 @@ E para limpar os arquivos intermediários gerados (arquivos .o e .c), vasta exec
 make clean
 ```
 
-Quando a compilação encerrar, teremos o executável `g-v1` na raiz do projeto.
+Quando a compilação encerrar, teremos o executável `g-v2` na raiz do projeto.
 
 ## Execução
 
 Abaixo temos o passo a passo para executar o projeto.
 
-### Compilação do Código-Fonte G-V1
+### Compilação do Código-Fonte G-V2
 
 Para executarmos o compilador temos duas opções. A primeira nós passamos apenas o nome do arquivo a ser compilado:
 
 ```sh
-./g-v1 <arquivo_entrada>
+./g-v2 <arquivo_entrada>
 ```
 
 Nesse caso você deve substituir o trecho `<arquivo_entrada>` pelo nome do arquivo (com caminho absoluto ou relativo) e o compilador irá gerar um arquivo chamado `assembly.s` na mesma pasta do executável.
@@ -54,7 +54,7 @@ Nesse caso você deve substituir o trecho `<arquivo_entrada>` pelo nome do arqui
 No segundo caso, podemos passar o nome do arquivo de saída:
 
 ```sh
-./g-v1 <arquivo_entrada> <arquivo_saida>
+./g-v2 <arquivo_entrada> <arquivo_saida>
 ```
 
 Analogamente ao primeiro caso, você deve substituir os trechos `<arquivo_entrada>` e `<arquivo_saida>` pelos nomes dos arquivos de entrada e saída, respectiamente. Diferente do primeiro caso, o compilador irá gerar um arquivo chamado `<arquivo_saida>.s` na mesma pasta do executável.
