@@ -30,15 +30,18 @@ tests = {
         "NotaEmConceitoPonto-e-virgulaFaltandoLin20.g",
     ],
     "semantic_error": [
-        "fatorial-VariavelNaoDeclaradaLin19.g",
-        "NotaEmConceito-Sub-expressoesDeTiposIncompativeisLin26.g",
-        "NotaEmConceito-VariavelNaoDeclaradaNoEsopoAtual.g",
-        "fatorial-VariavelRedeclaradaNoMesmoEscopoLin9.g",
-        "NotaEmConceito-VariavelDeTipoIncopativelComExpressaoLin19.g",
+        "gv2_arg_vetor_por_escalar.g",
+        "gv2_args_errados.g",
+        "gv2_atrib_vetor_escalar.g",
+        "gv2_funcao_nao_declarada.g",
+        "gv2_indice_nao_int.g",
+        "gv2_local_nome_param.g",
+        "gv2_retorne_tipo_errado.g",
+        "gv2_tipo_arg_errado.g",
     ]
 }
 
-for i in ["correct", "lexical_error", "syntatic_error"]: # ["correct", "lexical_error", "syntatic_error", "semantic_error"]:
+for i in ["correct", "lexical_error", "syntatic_error", "semantic_error"]: # ["correct", "lexical_error", "syntatic_error", "semantic_error"]:
     print(f"\\\\ ======================================== {i} ======================================== \\\\ \n")
 
     for test in tests[i]:
