@@ -169,3 +169,31 @@ void tree_node_set_type(TreeNode* node, TreeNodeDataType type) {
 
     node->type = type;
 }
+
+/**
+ * @brief Set left node
+ * 
+ * @param node Tree node
+ * @param left Left of the tree node
+ */
+void tree_node_set_left(TreeNode* node, TreeNode* left) {
+    if (node == NULL) {
+        return;
+    }
+
+    node->left = left;
+}
+
+/**
+ * @brief Set right node
+ * 
+ * @param node Tree node
+ * @param right Right of the tree node
+ */
+void tree_node_set_right(TreeNode* node, TreeNode* right) {
+    if (node == NULL) {
+        return;
+    }
+
+    node->right = right;
+}
