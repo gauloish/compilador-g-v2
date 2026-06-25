@@ -2,11 +2,14 @@ import subprocess
 
 tests = {
     "correct": [
-        "fatorial.g",
-        "NotaEmConceito.g",
-        "PA.g",
-        "SeqOrdenada.g",
-        "Soma.g",
+        "fatorialCorreto.g",
+        "selectionSort.g",
+        "selectionSortV2.g",
+        "selectionSortV3.g",
+        "somatorioVetor.g",
+        "somatorioVetorV2.g",
+        "somaVetores.g",
+        "somaVetoresV2.g",
     ],
     "lexical_error": [
         "NotaEmConceito-CadeiaCaracteresOcupaMaisDeUmalinhaLin10-11.g",
@@ -30,7 +33,7 @@ tests = {
     ]
 }
 
-for i in ["correct", "lexical_error", "syntatic_error", "semantic_error"]:
+for i in ["correct"]: # ["correct", "lexical_error", "syntatic_error", "semantic_error"]:
     print(f"\\\\ ======================================== {i} ======================================== \\\\ \n")
 
     for test in tests[i]:

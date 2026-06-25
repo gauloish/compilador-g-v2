@@ -737,7 +737,7 @@ UnExpr: '-' PrimExpr {
     };
 
 
-PrimExpr: IDENTIFICADOR '(' ListExpr ')' {
+PrimExpr: IDENTIFICADOR '(' ListaExpr ')' {
         $$ = tree_node_create(
             TREE_NODE_IDENTIFICADOR_FUNCAO,
             TREE_NODE_NOTYPE,
@@ -808,7 +808,7 @@ PrimExpr: IDENTIFICADOR '(' ListExpr ')' {
     };
 
 ListaExpr: Expr {
-        $$ = $2;
+        $$ = $1;
     }
     | ListaExpr ',' Expr {
         $$ = tree_node_create(
