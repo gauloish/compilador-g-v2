@@ -83,7 +83,7 @@ Programa: DeclVarGlobais DeclFunc DeclPrograma {
             @1.first_column
         );
 
-        //semantic_analysis(tree);
+        semantic_analysis(tree);
         //generate_code(tree);
     };
 
@@ -113,6 +113,7 @@ VarSection: '[' ListaDeclVar ']' {
             @1.first_column
         );
     };
+    
 ListaDeclVar: ListaVar ':' Tipo ';' ListaDeclVar {
         TreeNodeDataType type = tree_node_get_data_type($3);
         $$ = tree_node_create(

@@ -3,9 +3,9 @@ principal
 que digite o valor do termo inicial da progressao, o numero de elementos da progressao, e o valor
 da razao. Em seguida computa e imprime a soma dos elementos da progresao */
 
-	{
+	[
 		nota: int;
-	}
+    ]
 	{
 		escreva "Digite um valor inteiro 
 				para a nota de um aluno";

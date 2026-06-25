@@ -12,14 +12,19 @@ tests = {
         "somaVetoresV2.g",
     ],
     "lexical_error": [
+        "char_invalido.g",
+        "comentario_sem_fim.g",
         "NotaEmConceito-CadeiaCaracteresOcupaMaisDeUmalinhaLin10-11.g",
         "NotaEmConceito-CaractereInvalidoLinha16.g",
-        "NotaEmConceito-ComentarioNaoTerminaLin1.g",
+        "NotaEmConceito-ComentarioNaoTerminaLin2.g",
         "NotaEmConceito-MaisDeUmCaractereNaConstCarLin55.g",
+        "string_newline.g",
     ],
     "syntatic_error": [
+        "gv2_funcao_sem_fechamento.g",
+        "gv2_varsection_chaves.g",
         "NotaEmConceito-AbreChavesEsperadoLin18.g",
-        "NotaEmConceito-DeclaracaoNaoEnvolvidaEmChavesLin15-17.g",
+        "NotaEmConceito-DeclaracaoNaoEnvolvidaEmColchetesLin15-17.g",
         "NotaEmConceito-FechaChavesEsperadoLin49.g",
         "NotaEmConceito-FimseFaltandoLIn60.g",
         "NotaEmConceitoPonto-e-virgulaFaltandoLin20.g",
@@ -33,7 +38,7 @@ tests = {
     ]
 }
 
-for i in ["correct"]: # ["correct", "lexical_error", "syntatic_error", "semantic_error"]:
+for i in ["correct", "lexical_error", "syntatic_error"]: # ["correct", "lexical_error", "syntatic_error", "semantic_error"]:
     print(f"\\\\ ======================================== {i} ======================================== \\\\ \n")
 
     for test in tests[i]:
