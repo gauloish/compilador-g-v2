@@ -4,10 +4,17 @@
 #define __SYMBOL_TABLE_H__
 
 typedef enum _SymbolDataType SymbolDataType;
+typedef enum _SymbolKind SymbolKind;
 
+typedef struct _SymbolParameters SymbolParameters;
 typedef struct _SymbolEntry SymbolEntry;
 typedef struct _SymbolTable SymbolTable;
 typedef struct _SymbolScope SymbolScope;
+
+SymbolParameters* symbol_parameters_create(SymbolDataType, SymbolKind);
+void symbol_parameters_delete(SymbolParameters*);
+void symbol_parameters_add_parameter(SymbolParameters*, SymbolDataType, SymbolKind);
+int symbol_parameters_check(SymbolParameters*, SymbolParameters*);
 
 SymbolEntry* symbol_entry_create(const char*, SymbolDataType, int);
 void symbol_entry_delete(SymbolEntry*);
@@ -35,6 +42,12 @@ enum _SymbolDataType {
     SYMBOL_INTEGER,
     SYMBOL_CHARACTER,
     SYMBOL_NOTYPE,
+};
+
+enum _SymbolKind {
+    SYMBOL_VARIABLE,
+    SYMBOL_VECTOR,
+    SYMBOL_FUNCTION,
 };
 
 #endif /* __SYMBOL_TABLE_H__ */

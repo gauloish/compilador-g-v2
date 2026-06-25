@@ -8,6 +8,17 @@
 #define TABLE_SIZE 257
 
 /**
+ * @brief Symbol parameters struct
+ * 
+ */
+struct _SymbolParameters {
+    SymbolDataType type;
+    SymbolKind kind;
+    SymbolParameters* next;
+    int amount;
+};
+
+/**
  * @brief Symbol entry struct
  *
  */
@@ -36,6 +47,94 @@ struct _SymbolScope {
     SymbolScope* next;
     int position;
 };
+
+// -------------------- Symbol Parameters -------------------- //
+
+/**
+ * @brief Create symbol parameters for symbol function
+ * 
+ * @param type Symbol data type
+ * @param kind Symbol kind
+ * @return SymbolParameters* New symbol parameters object
+ */
+SymbolParameters* symbol_parameters_create(SymbolDataType type, SymbolKind kind) {
+    SymbolParameters* parameters = (SymbolParameters*) allocate_memory(sizeof(SymbolParameters));
+
+    *parameters = (SymbolParameters){
+        .type = type,
+        .kind = kind,
+        .next = NULL,
+        .amount = 1,
+    };
+
+    return parameters;
+}
+
+/**
+ * @brief Delete symbol parameters object
+ * 
+ * @param parameters Symbol parameters to be deleted
+ */
+void symbol_parameters_delete(SymbolParameters* parameters) {
+    while (parameters != NULL) {
+        SymbolParameters* next = parameters->next;
+        free_memory(parameters);
+        parameters = next;
+    }
+}
+
+/**
+ * @brief Add a new parameter in symbol parameter object
+ * 
+ * @param parameters Symbol parameter object
+ * @param type The data type of the new parameter
+ * @param kind The kind of the new parameter
+ */
+void symbol_parameters_add_parameter(SymbolParameters* parameters, SymbolDataType type, SymbolKind kind) {
+    if (parameters == NULL) {
+        return;
+    }
+
+    parameters->amount++;
+
+    while (parameters->next != NULL) {
+        parameters = parameters->next;
+    }
+
+    parameters->next = symbol_parameters_create(type, kind);
+}
+
+/**
+ * @brief Check if two symbol parameters are equal
+ * 
+ * @param parameters First symbol parameters
+ * @param other Second symbol parameters
+ * @return int Position of parameter error
+ */
+int symbol_parameters_check(SymbolParameters* parameters, SymbolParameters* other) {
+    if (parameters == NULL || other == NULL) {
+        return -1;
+    }
+
+    if (parameters->amount != other->amount) {
+        return -2;
+    } 
+
+    int position = 0;
+
+    while (parameters->next != NULL) {
+        position++;
+
+        if (parameters->kind != other->kind || parameters->type != other->type) {
+            return position;
+        }
+
+        parameters = parameters->next;
+        other = other->next;
+    }
+
+    return 0;
+}
 
 // -------------------- Symbol Entry -------------------- //
 
