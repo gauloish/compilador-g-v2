@@ -25,8 +25,11 @@ struct _SymbolParameters {
 struct _SymbolEntry {
     const char* name;
     SymbolDataType type;
+    SymbolKind kind;
     SymbolEntry* next;
+    SymbolParameters* parameters;
     int position;
+    int amount;
 };
 
 /**
@@ -143,16 +146,22 @@ int symbol_parameters_check(SymbolParameters* parameters, SymbolParameters* othe
  * 
  * @param name Symbol name
  * @param type Symbol type (integer or character)
+ * @param kind Symbol kind
+ * @param parameters Symbol parameters (only for function symbol kind)
  * @param position Position in relation the first symbol
+ * @param amount Vector size (only for vector symbol kind)
  * @return SymbolEntry* New symbol entry
  */
-SymbolEntry* symbol_entry_create(const char* name, SymbolDataType type, int position) {
+SymbolEntry* symbol_entry_create(const char* name, SymbolDataType type, SymbolKind kind, SymbolParameters* parameters, int position, int amount) {
     SymbolEntry* symbol = (SymbolEntry*) allocate_memory(sizeof(SymbolEntry));
 
     *symbol = (SymbolEntry){
         .name = name,
         .type = type,
+        .kind = kind,
+        .parameters = parameters,
         .position = position,
+        .amount = amount,
         .next = NULL,
     };
 
@@ -165,6 +174,11 @@ SymbolEntry* symbol_entry_create(const char* name, SymbolDataType type, int posi
  * @param symbol Symbol entry to be deleted
  */
 void symbol_entry_delete(SymbolEntry* symbol) {
+    if (symbol == NULL) {
+        return;
+    }
+
+    symbol_parameters_delete(symbol);
     free_memory(symbol);
 }
 
@@ -197,6 +211,34 @@ const char* symbol_entry_get_name(SymbolEntry* symbol) {
 }
 
 /**
+ * @brief Get symbol kind
+ * 
+ * @param symbol Symbol
+ * @return Symbol kind
+ */
+SymbolKind symbol_entry_get_kind(SymbolEntry* symbol) {
+    if (symbol == NULL) {
+        return NULL;
+    }
+
+    return symbol->kind;
+}
+
+/**
+ * @brief Get symbol parameters
+ * 
+ * @param symbol Symbol
+ * @return Symbol parameters
+ */
+SymbolParameters* symbol_entry_get_parameters(SymbolEntry* symbol) {
+    if (symbol == NULL) {
+        return NULL;
+    }
+
+    return symbol->parameters;
+}
+
+/**
  * @brief Get symbol position
  * 
  * @param symbol Symbol
@@ -210,6 +252,19 @@ int symbol_entry_get_position(SymbolEntry* symbol) {
     return symbol->position;
 }
 
+/**
+ * @brief Get symbol amount
+ * 
+ * @param symbol Symbol
+ * @return int Symbol amount
+ */
+int symbol_entry_get_amount(SymbolEntry* symbol) {
+    if (symbol == NULL) {
+        return 0;
+    }
+
+    return symbol->amount;
+}
 // -------------------- Symbol Table -------------------- //
 
 /**
@@ -274,16 +329,14 @@ int compute_hash(const char* string) {
  * 
  * @param symbol_table Symbol table where symbol will be added
  * @param name Name of the symbol
- * @param type Data type of the symbol
- * @param position Position in relation the first symbol
+ * @param symbol Symbol entry
  */
-void symbol_table_add_symbol(SymbolTable* symbol_table, const char* name, SymbolDataType type, int position) {
-    if (symbol_table == NULL) {
+void symbol_table_add_symbol(SymbolTable* symbol_table, SymbolEntry* symbol) {
+    if (symbol_table == NULL || symbol == NULL) {
         return;
     }
 
-    SymbolEntry* symbol = symbol_entry_create(name, type, position);
-    int i = compute_hash(name);
+    int i = compute_hash(symbol->name);
 
     symbol->next = symbol_table->table[i];
     symbol_table->table[i] = symbol;
@@ -430,18 +483,17 @@ SymbolScope* symbol_scope_pop_scope(SymbolScope* symbol_scope) {
 /**
  * @brief Add symbol in the current scope
  * 
- * @param symbol_scope Scymbol scope stack
- * @param name Name of the symbol
- * @param type Type of the symbol
+ * @param symbol_scope Symbol scope stack
+ * @param symbol Symbol entry
  */
-void symbol_scope_add_symbol(SymbolScope* symbol_scope, const char* name, SymbolDataType type) {
+void symbol_scope_add_symbol(SymbolScope* symbol_scope, SymbolEntry* symbol) {
     if (symbol_scope == NULL) {
         return;
     }
 
     symbol_scope->position++;
 
-    symbol_table_add_symbol(symbol_scope->symbol_table, name, type, symbol_scope->position);
+    symbol_table_add_symbol(symbol_scope->symbol_table, symbol);
 }
 
 /**
