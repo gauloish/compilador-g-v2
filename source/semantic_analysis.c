@@ -80,7 +80,8 @@ void traverse_tree(TreeNode* node, SymbolScope* scopes) {
             }
             break;
 
-        case TREE_NODE_DECL_VAR:
+        // TODO: fix this
+        case TREE_NODE_LISTA_VAR:
             {
                 TreeNodeDataType type = tree_node_get_data_type(node);
 
@@ -592,7 +593,8 @@ void traverse_tree(TreeNode* node, SymbolScope* scopes) {
 
             break;
 
-        case TREE_NODE_IDENTIFICADOR:
+        // TODO: fix this
+        case TREE_NODE_IDENTIFICADOR_FUNCAO:
             {
                 const char* name = tree_node_get_lexeme(node);
 

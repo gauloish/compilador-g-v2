@@ -102,41 +102,6 @@ DeclVarGlobais: GLOBAL VarSection {
         $$ = NULL;
     }
 
-DeclPrograma: PRINCIPAL Bloco {
-        $$ = tree_node_create(
-            TREE_NODE_DECL_PROGRAMA,
-            TREE_NODE_NOTYPE,
-            $2,
-            NULL,
-            NULL,
-            @1.first_line,
-            @1.first_column
-        );
-    };
-
-Bloco: '{' ListaComando '}' {
-        $$ = tree_node_create(
-            TREE_NODE_BLOCO,
-            TREE_NODE_NOTYPE,
-            $2,
-            NULL,
-            NULL,
-            @1.first_line,
-            @1.first_column
-        );
-    }
-    | VarSection '{' ListaComando '}' {
-        $$ = tree_node_create(
-            TREE_NODE_VAR_SECTION_BLOCO,
-            TREE_NODE_NOTYPE,
-            $3,
-            $1,
-            NULL,
-            @1.first_line,
-            @1.first_column
-        );
-    };
-
 VarSection: '[' ListaDeclVar ']' {
         $$ = tree_node_create(
             TREE_NODE_VAR_SECTION,
@@ -148,7 +113,6 @@ VarSection: '[' ListaDeclVar ']' {
             @1.first_column
         );
     };
-
 ListaDeclVar: ListaVar ':' Tipo ';' ListaDeclVar {
         TreeNodeDataType type = tree_node_get_data_type($3);
         $$ = tree_node_create(
@@ -161,7 +125,7 @@ ListaDeclVar: ListaVar ':' Tipo ';' ListaDeclVar {
             @1.first_column
         );
     }
-    |  ListaVar ':' Tipo ';' {
+    | ListaVar ':' Tipo ';' {
         TreeNodeDataType type = tree_node_get_data_type($3);
 
         $$ = tree_node_create(
@@ -186,12 +150,22 @@ ListaVar: IDENTIFICADOR ',' ListaVar {
             @1.first_column
         );
     }
-    | IDENTIFICADOR '[' INTCONST ']' ListaVar {
+    | IDENTIFICADOR '[' INTCONST ']' ',' ListaVar {
+        TreeNode* index = tree_node_create(
+            TREE_NODE_INTCONST,
+            TREE_NODE_INTEGER,
+            NULL,
+            NULL,
+            $3,
+            @3.first_line,
+            @3.first_column
+        );
+
         $$ = tree_node_create(
             TREE_NODE_LISTA_VAR,
             TREE_NODE_NOTYPE,
-            $3,
-            $5,
+            index,
+            $6,
             $1,
             @1.first_line,
             @1.first_column
@@ -209,10 +183,20 @@ ListaVar: IDENTIFICADOR ',' ListaVar {
         ); 
     }
     | IDENTIFICADOR '[' INTCONST ']' {
+        TreeNode* index = tree_node_create(
+            TREE_NODE_INTCONST,
+            TREE_NODE_INTEGER,
+            NULL,
+            NULL,
+            $3,
+            @3.first_line,
+            @3.first_column
+        );
+
         $$ = tree_node_create(
             TREE_NODE_LISTA_VAR,
             TREE_NODE_NOTYPE,
-            $3,
+            index,
             NULL,
             $1,
             @1.first_line,
@@ -222,6 +206,7 @@ ListaVar: IDENTIFICADOR ',' ListaVar {
 
 DeclFunc: FUNCAO '[' IDENTIFICADOR '(' ListaParametros ')' ':' Tipo Bloco ListaFuncoes ']' {
         TreeNodeDataType type = tree_node_get_data_type($8);
+
         TreeNode* function = tree_node_create(
             TREE_NODE_FUNCAO,
             type,
@@ -233,7 +218,7 @@ DeclFunc: FUNCAO '[' IDENTIFICADOR '(' ListaParametros ')' ':' Tipo Bloco ListaF
         );
 
         TreeNode* list_function = tree_node_create(
-            TREE_NODE_LISTA_FUNCAO,
+            TREE_NODE_LISTA_FUNCOES,
             TREE_NODE_NOTYPE,
             function,
             $10,
@@ -243,7 +228,7 @@ DeclFunc: FUNCAO '[' IDENTIFICADOR '(' ListaParametros ')' ':' Tipo Bloco ListaF
         );
 
         $$ = tree_node_create(
-            TREE_NODE_DECL_FUNCAO,
+            TREE_NODE_DECL_FUNC,
             TREE_NODE_NOTYPE,
             list_function,
             NULL,
@@ -258,6 +243,7 @@ DeclFunc: FUNCAO '[' IDENTIFICADOR '(' ListaParametros ')' ':' Tipo Bloco ListaF
 
 ListaFuncoes: IDENTIFICADOR '(' ListaParametros ')' ':' Tipo Bloco ListaFuncoes {
         TreeNodeDataType type = tree_node_get_data_type($6);
+
         TreeNode* function = tree_node_create(
             TREE_NODE_FUNCAO,
             type,
@@ -269,7 +255,7 @@ ListaFuncoes: IDENTIFICADOR '(' ListaParametros ')' ':' Tipo Bloco ListaFuncoes 
         );
 
         $$ = tree_node_create(
-            TREE_NODE_LISTA_FUNCAO,
+            TREE_NODE_LISTA_FUNCOES,
             TREE_NODE_NOTYPE,
             function,
             $8,
@@ -284,7 +270,7 @@ ListaFuncoes: IDENTIFICADOR '(' ListaParametros ')' ':' Tipo Bloco ListaFuncoes 
 
 ListaParametros: ListaParametrosTail {
         $$ = tree_node_create(
-            TREE_NODE_LISTA_FUNCAO,
+            TREE_NODE_LISTA_FUNCOES,
             TREE_NODE_NOTYPE,
             $1,
             NULL,
@@ -360,6 +346,41 @@ ListaParametrosTail: IDENTIFICADOR ':' Tipo {
             @1.first_line,
             @1.first_column
         ); 
+    };
+
+DeclPrograma: PRINCIPAL Bloco {
+        $$ = tree_node_create(
+            TREE_NODE_DECL_PROGRAMA,
+            TREE_NODE_NOTYPE,
+            $2,
+            NULL,
+            NULL,
+            @1.first_line,
+            @1.first_column
+        );
+    };
+
+Bloco: '{' ListaComando '}' {
+        $$ = tree_node_create(
+            TREE_NODE_BLOCO,
+            TREE_NODE_NOTYPE,
+            $2,
+            NULL,
+            NULL,
+            @1.first_line,
+            @1.first_column
+        );
+    }
+    | VarSection '{' ListaComando '}' {
+        $$ = tree_node_create(
+            TREE_NODE_VAR_SECTION_BLOCO,
+            TREE_NODE_NOTYPE,
+            $3,
+            $1,
+            NULL,
+            @1.first_line,
+            @1.first_column
+        );
     };
 
 Tipo: INT {
@@ -830,7 +851,7 @@ ListaExpr: Expr {
  */
 void yyerror(const char *error) {
     if (analysis_error) {
-        fprintf(stderr, "ERRO: %s - LINHA: %d, COLUNA: %d\n", error, yylloc.first_line, yylloc.first_column);
+        fprintf(stderr, "ERRO: %s - linha: %d, coluna: %d\n", error, yylloc.first_line, yylloc.first_column);
     }
     else {
         fprintf(stderr, "ERRO: %s\n", error);

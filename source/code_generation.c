@@ -309,7 +309,8 @@ void build_instructions(FILE* file, TreeNode* node, SymbolScope* scopes, Strings
             }
             break;
 
-        case TREE_NODE_DECL_VAR:
+        // TODO fix this
+        case TREE_NODE_LISTA_VAR:
             {
                 TreeNodeDataType type = tree_node_get_data_type(node);
 
@@ -658,7 +659,8 @@ void build_instructions(FILE* file, TreeNode* node, SymbolScope* scopes, Strings
             }
             break;
 
-        case TREE_NODE_IDENTIFICADOR:
+        // TODO: fix this
+        case TREE_NODE_IDENTIFICADOR_VARIAVEL:
             {
                 SymbolEntry* symbol = symbol_scope_get_symbol(scopes, tree_node_get_lexeme(node), false);
                 SymbolDataType type = symbol_entry_get_data_type(symbol);

@@ -38,5 +38,5 @@ for i in ["correct"]: # ["correct", "lexical_error", "syntatic_error", "semantic
 
     for test in tests[i]:
         print(f"Arquivo \"{i}/{test}\":")
-        subprocess.run(["../g-v1", f"{i}/{test}"])
+        subprocess.run(["../g-v2", f"{i}/{test}"])
         print()
