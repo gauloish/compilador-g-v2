@@ -6,7 +6,7 @@
 #include "../include/memory.h"
 #include "../include/syntax_tree.h"
 #include "../include/semantic_analysis.h"
-#include "../include/code_generation.h"
+// #include "../include/code_generation.h"
 
 extern int yylex();
 extern char* yytext;
@@ -116,6 +116,7 @@ VarSection: '[' ListaDeclVar ']' {
     
 ListaDeclVar: ListaVar ':' Tipo ';' ListaDeclVar {
         TreeNodeDataType type = tree_node_get_data_type($3);
+
         $$ = tree_node_create(
             TREE_NODE_LISTA_DECL_VAR,
             type,
@@ -301,7 +302,7 @@ ListaParametrosTail: IDENTIFICADOR ':' Tipo {
         TreeNodeDataType type = tree_node_get_data_type($5);
 
         if (type == TREE_NODE_INTEGER) {
-            type =  TREE_NODE_VECTOR_INTEGER;
+            type = TREE_NODE_VECTOR_INTEGER;
         } else {
             type = TREE_NODE_VECTOR_CHARACTER;
         }

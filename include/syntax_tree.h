@@ -13,7 +13,7 @@ TreeNode* tree_node_get_right(TreeNode*);
 int tree_node_get_line(TreeNode*);
 int tree_node_get_column(TreeNode*);
 const char* tree_node_get_lexeme(TreeNode*);
-void tree_node_set_type(TreeNode*, TreeNodeDataType);
+void tree_node_set_data_type(TreeNode*, TreeNodeDataType);
 void tree_node_set_left(TreeNode*, TreeNode*);
 void tree_node_set_right(TreeNode*, TreeNode*);
 

@@ -51,6 +51,7 @@ enum _SymbolKind {
     SYMBOL_VARIABLE,
     SYMBOL_VECTOR,
     SYMBOL_FUNCTION,
+    SYMBOL_NOKIND,
 };
 
 #endif /* __SYMBOL_TABLE_H__ */

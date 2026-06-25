@@ -8,6 +8,9 @@
 
 #define MESSAGE_SIZE 512
 
+bool scopes_function_created = false;
+int return_type_function = 0;
+
 extern void yyerror(const char*);
 
 /**
@@ -46,6 +49,12 @@ void traverse_tree(TreeNode* node, SymbolScope* scopes) {
             }
             break;
 
+        case TREE_NODE_DECL_VAR_GLOBAIS:
+            {
+                traverse_tree(tree_node_get_right(node),scopes);
+            }
+            break;
+
         case TREE_NODE_DECL_PROGRAMA:
             {
                 traverse_tree(tree_node_get_left(node), scopes);
@@ -60,10 +69,22 @@ void traverse_tree(TreeNode* node, SymbolScope* scopes) {
 
         case TREE_NODE_VAR_SECTION_BLOCO:
             {
-                scopes = symbol_scope_push_scope(scopes);
+                bool scopes_created = false;
+
+                if (!scopes_function_created) {
+                    scopes = symbol_scope_push_scope(scopes);
+                    scopes_created = true;
+                }
+                
+                scopes_function_created = false;
+
                 traverse_tree(tree_node_get_right(node), scopes);
                 traverse_tree(tree_node_get_left(node), scopes);
-                scopes = symbol_scope_pop_scope(scopes);
+                
+                if(scopes_created){
+                    scopes = symbol_scope_pop_scope(scopes);                    
+                }
+
             }
             break;
 
@@ -75,12 +96,16 @@ void traverse_tree(TreeNode* node, SymbolScope* scopes) {
 
         case TREE_NODE_LISTA_DECL_VAR:
             {
-                traverse_tree(tree_node_get_left(node), scopes);
+                TreeNodeDataType type = tree_node_get_data_type(node);
+                TreeNode* left = tree_node_get_left(node);
+
+                tree_node_set_data_type(left, type);
+ 
+                traverse_tree(left, scopes);
                 traverse_tree(tree_node_get_right(node), scopes);
             }
             break;
 
-        // TODO: fix this
         case TREE_NODE_LISTA_VAR:
             {
                 TreeNodeDataType type = tree_node_get_data_type(node);
@@ -91,20 +116,124 @@ void traverse_tree(TreeNode* node, SymbolScope* scopes) {
                     if (symbol_scope_check_symbol(scopes, name, true)) {
                         snprintf(message, sizeof(message), "Variável '%s' já declarada nesse escopo", name);
                         report_semantic_error(message, node);
-                    }
-                    else if (type == TREE_NODE_INTEGER) {
-                        symbol_scope_add_symbol(scopes, name, SYMBOL_INTEGER);
-                    }
-                    else if (type == TREE_NODE_CHARACTER) {
-                        symbol_scope_add_symbol(scopes, name, SYMBOL_CHARACTER);
-                    }
+                    } else {
+                        TreeNode* left = tree_node_get_left(node);
+                        
+                        SymbolDataType symbol_type;
+                        SymbolEntry* symbol;
 
-                    tree_node_set_type(node, type);
-                    node = tree_node_get_left(node);
+                        if (type == TREE_NODE_INTEGER) {
+                            symbol_type = SYMBOL_INTEGER;
+                        }
+                        else if (type == TREE_NODE_CHARACTER) {
+                            symbol_type = SYMBOL_CHARACTER;
+                        }
+
+                        if (left != NULL) {
+                            int amount = atoi(tree_node_get_lexeme(left));
+
+                            symbol = symbol_entry_create(name, symbol_type, SYMBOL_VECTOR, NULL, 0, amount);
+                        } else {
+                            symbol = symbol_entry_create(name, symbol_type, SYMBOL_VARIABLE, NULL, 0, 1);
+                        }
+
+                        symbol_scope_add_symbol(scopes, symbol);
+                    }
+                        
+                    tree_node_set_data_type(node, type);
+                    node = tree_node_get_right(node);
                 }
             }
 
             break;
+
+        case TREE_NODE_DECL_FUNC:
+            {
+                traverse_tree(tree_node_get_left(node), scopes);
+            }   
+            break; 
+        
+        case TREE_NODE_LISTA_FUNCOES:
+            {
+                traverse_tree(tree_node_get_left(node), scopes);
+                traverse_tree(tree_node_get_right(node), scopes); 
+            }   
+            break;
+
+        case TREE_NODE_FUNCAO:
+            {
+                SymbolScope* global_scopes = scopes;   
+                scopes = symbol_scope_push_scope(scopes);
+
+                const char* function_name = tree_node_get_lexeme(node);
+                TreeNodeDataType function_type = tree_node_get_data_type(node); 
+                
+                SymbolParameters* parameters = NULL;
+                TreeNode* left = tree_node_get_left(node);
+
+                if (left != NULL) {
+                    TreeNode* right = tree_node_get_left(left);
+
+                    while (right != NULL) {
+                        const char* symbol_name = tree_node_get_lexeme(right);
+                        TreeNodeDataType symbol_type = tree_node_get_data_type(right);
+
+                        SymbolDataType symbol_data_type;
+                        SymbolKind symbol_kind;
+
+                        if (symbol_type == TREE_NODE_INTEGER) {
+                            symbol_data_type = SYMBOL_INTEGER;
+                            symbol_kind = SYMBOL_VARIABLE;
+                        }
+                        else if (symbol_type == TREE_NODE_CHARACTER) {
+                            symbol_data_type = SYMBOL_CHARACTER;
+                            symbol_kind = SYMBOL_VARIABLE;
+                        }
+                        else if (symbol_type == TREE_NODE_VECTOR_INTEGER) {
+                            symbol_data_type = SYMBOL_INTEGER;
+                            symbol_kind = SYMBOL_VECTOR;
+                        }
+                        else if (symbol_type == TREE_NODE_VECTOR_CHARACTER) {
+                            symbol_data_type = SYMBOL_CHARACTER;
+                            symbol_kind = SYMBOL_VECTOR;
+                        }
+
+                        if (parameters == NULL) {
+                            parameters = symbol_parameters_create(symbol_data_type, symbol_kind);
+                        }
+                        else {
+                            symbol_parameters_add_parameter(parameters, symbol_data_type, symbol_kind);
+                        }
+
+                        SymbolEntry* symbol = symbol_entry_create(symbol_name, symbol_data_type, symbol_kind, NULL, 0, 1);
+                        symbol_scope_add_symbol(global_scopes, symbol);
+
+                        right = tree_node_get_right(right);
+                    }
+                }
+
+                SymbolDataType function_data_type;
+                if (function_type == TREE_NODE_INTEGER) {
+                    function_data_type = SYMBOL_INTEGER;
+                    return_type_function = 1;
+                } else {
+                    function_data_type = SYMBOL_CHARACTER;
+                    return_type_function = 2;
+                }
+
+                SymbolEntry* symbol_function = symbol_entry_create(function_name, function_data_type, SYMBOL_FUNCTION, parameters, 0, 1);
+                symbol_scope_add_symbol(scopes, symbol_function);
+                
+                scopes_function_created = true;
+                
+                traverse_tree(tree_node_get_right(node),scopes);
+                
+                scopes_function_created = false;
+                return_type_function = 0;
+
+                scopes = symbol_scope_pop_scope(scopes);
+            }
+            break;    
 
         case TREE_NODE_INT:
             break;
@@ -122,7 +251,34 @@ void traverse_tree(TreeNode* node, SymbolScope* scopes) {
         case TREE_NODE_COMANDO:
             break;
 
-        case TREE_NODE_LEIA:
+        case TREE_NODE_RETORNE:
+            {
+                
+                if(return_type_function == 0){
+                    snprintf(message, sizeof(message), "Palavra-chave 'retorne' fora de função");
+                    report_semantic_error(message, node);
+                }
+
+                TreeNode* left = tree_node_get_left(node);
+
+                traverse_tree(left, scopes);
+
+                TreeNodeDataType type = tree_node_get_data_type(left);
+
+                if(type == TREE_NODE_INTEGER && return_type_function != 1) {
+                    snprintf(message, sizeof(message), "A função deveria retornar um inteiro");
+                    report_semantic_error(message, node);
+                }
+                if (type == TREE_NODE_CHARACTER && return_type_function != 2) {
+                    snprintf(message, sizeof(message), "A função deveria retornar um caractere");
+                    report_semantic_error(message, node);
+                }
+
+            }
+
+            break;
+
+        case TREE_NODE_IDENTIFICADOR_VARIAVEL:
             {
                 const char* name = tree_node_get_lexeme(node);
 
@@ -130,6 +286,21 @@ void traverse_tree(TreeNode* node, SymbolScope* scopes) {
                     snprintf(message, sizeof(message), "Variável '%s' não declarada previamente", name);
                     report_semantic_error(message, node);
                 }
+                
+                TreeNode* left = tree_node_get_left(node);
+                
+                traverse_tree(left, scopes);
+
+                if (tree_node_get_data_type(left) != TREE_NODE_INTEGER) {
+                    snprintf(message, sizeof(message), "Expressão do indice de '%s' deve do tipo inteiro", name);
+                    report_semantic_error(message, node);
+                }
+            }   
+            break;  
+
+        case TREE_NODE_LEIA:
+            {
+                traverse_tree(tree_node_get_left(node), scopes);
             }
 
             break;
@@ -261,7 +432,7 @@ void traverse_tree(TreeNode* node, SymbolScope* scopes) {
                     report_semantic_error(message, right);
                 }
                 else {
-                    tree_node_set_type(node, TREE_NODE_BOOLEAN);
+                    tree_node_set_data_type(node, TREE_NODE_BOOLEAN);
                 }
             }
 
@@ -287,7 +458,7 @@ void traverse_tree(TreeNode* node, SymbolScope* scopes) {
                     report_semantic_error(message, right);
                 }
                 else {
-                    tree_node_set_type(node, TREE_NODE_BOOLEAN);
+                    tree_node_set_data_type(node, TREE_NODE_BOOLEAN);
                 }
             }
 
@@ -317,7 +488,7 @@ void traverse_tree(TreeNode* node, SymbolScope* scopes) {
                     report_semantic_error(message, node);
                 }
                 else {
-                    tree_node_set_type(node, TREE_NODE_BOOLEAN);
+                    tree_node_set_data_type(node, TREE_NODE_BOOLEAN);
                 }
             }
 
@@ -347,7 +518,7 @@ void traverse_tree(TreeNode* node, SymbolScope* scopes) {
                     report_semantic_error(message, node);
                 }
                 else {
-                    tree_node_set_type(node, TREE_NODE_BOOLEAN);
+                    tree_node_set_data_type(node, TREE_NODE_BOOLEAN);
                 }
             }
 
@@ -373,7 +544,7 @@ void traverse_tree(TreeNode* node, SymbolScope* scopes) {
                     report_semantic_error(message, right);
                 }
                 else {
-                    tree_node_set_type(node, TREE_NODE_BOOLEAN);
+                    tree_node_set_data_type(node, TREE_NODE_BOOLEAN);
                 }
             }
 
@@ -399,7 +570,7 @@ void traverse_tree(TreeNode* node, SymbolScope* scopes) {
                     report_semantic_error(message, right);
                 }
                 else {
-                    tree_node_set_type(node, TREE_NODE_BOOLEAN);
+                    tree_node_set_data_type(node, TREE_NODE_BOOLEAN);
                 }
             }
 
@@ -425,7 +596,7 @@ void traverse_tree(TreeNode* node, SymbolScope* scopes) {
                     report_semantic_error(message, right);
                 }
                 else {
-                    tree_node_set_type(node, TREE_NODE_BOOLEAN);
+                    tree_node_set_data_type(node, TREE_NODE_BOOLEAN);
                 }
             }
 
@@ -451,7 +622,7 @@ void traverse_tree(TreeNode* node, SymbolScope* scopes) {
                     report_semantic_error(message, right);
                 }
                 else {
-                    tree_node_set_type(node, TREE_NODE_BOOLEAN);
+                    tree_node_set_data_type(node, TREE_NODE_BOOLEAN);
                 }
             }
 
@@ -477,7 +648,7 @@ void traverse_tree(TreeNode* node, SymbolScope* scopes) {
                     report_semantic_error(message, right);
                 }
                 else {
-                    tree_node_set_type(node, TREE_NODE_INTEGER);
+                    tree_node_set_data_type(node, TREE_NODE_INTEGER);
                 }
             }
 
@@ -503,7 +674,7 @@ void traverse_tree(TreeNode* node, SymbolScope* scopes) {
                     report_semantic_error(message, right);
                 }
                 else {
-                    tree_node_set_type(node, TREE_NODE_INTEGER);
+                    tree_node_set_data_type(node, TREE_NODE_INTEGER);
                 }
             }
 
@@ -529,7 +700,7 @@ void traverse_tree(TreeNode* node, SymbolScope* scopes) {
                     report_semantic_error(message, right);
                 }
                 else {
-                    tree_node_set_type(node, TREE_NODE_INTEGER);
+                    tree_node_set_data_type(node, TREE_NODE_INTEGER);
                 }
             }
 
@@ -555,7 +726,7 @@ void traverse_tree(TreeNode* node, SymbolScope* scopes) {
                     report_semantic_error(message, right);
                 }
                 else {
-                    tree_node_set_type(node, TREE_NODE_INTEGER);
+                    tree_node_set_data_type(node, TREE_NODE_INTEGER);
                 }
             }
 
@@ -571,7 +742,7 @@ void traverse_tree(TreeNode* node, SymbolScope* scopes) {
                     report_semantic_error(message, expression);
                 }
                 else {
-                    tree_node_set_type(node, TREE_NODE_INTEGER);
+                    tree_node_set_data_type(node, TREE_NODE_INTEGER);
                 }
             }
 
@@ -587,44 +758,92 @@ void traverse_tree(TreeNode* node, SymbolScope* scopes) {
                     report_semantic_error(message, expression);
                 }
                 else {
-                    tree_node_set_type(node, TREE_NODE_BOOLEAN);
+                    tree_node_set_data_type(node, TREE_NODE_BOOLEAN);
                 }
             }
 
             break;
 
-        // TODO: fix this
         case TREE_NODE_IDENTIFICADOR_FUNCAO:
             {
                 const char* name = tree_node_get_lexeme(node);
 
                 if (!symbol_scope_check_symbol(scopes, name, false)) {
-                    snprintf(message, sizeof(message), "Variável '%s' não declarada previamente", name);
+                    snprintf(message, sizeof(message), "Função '%s' não declarada previamente", name);
                     report_semantic_error(message, node);
                 }
 
                 SymbolEntry* symbol = symbol_scope_get_symbol(scopes, name, false);
-                SymbolDataType type = symbol_entry_get_data_type(symbol);
+                SymbolKind kind = symbol_entry_get_kind(symbol);
 
-                if (type == SYMBOL_INTEGER) {
-                    tree_node_set_type(node, TREE_NODE_INTEGER);
-                }
-                else if (type == SYMBOL_CHARACTER) {
-                    tree_node_set_type(node, TREE_NODE_CHARACTER);
+                if (kind == SYMBOL_FUNCTION) {
+                    SymbolParameters* parameters = symbol_entry_get_parameters(symbol);
+                    SymbolParameters* others = NULL;
+
+                    TreeNode* right = tree_node_get_left(node);
+                    
+                    while(right != NULL){
+                        TreeNode* expr = tree_node_get_left(right);
+                        traverse_tree(expr, scopes);
+
+                        TreeNodeDataType symbol_type = tree_node_get_data_type(expr);
+
+                        SymbolDataType symbol_data_type;
+                        SymbolKind symbol_kind;
+
+                        if (symbol_type == TREE_NODE_INTEGER) {
+                            symbol_data_type = SYMBOL_INTEGER;
+                            symbol_kind = SYMBOL_VARIABLE;
+                        }
+                        else if (symbol_type == TREE_NODE_CHARACTER) {
+                            symbol_data_type = SYMBOL_CHARACTER;
+                            symbol_kind = SYMBOL_VARIABLE;
+                        }
+                        else if (symbol_type == TREE_NODE_VECTOR_INTEGER) {
+                            symbol_data_type = SYMBOL_INTEGER;
+                            symbol_kind = SYMBOL_VECTOR;
+                        }
+                        else if (symbol_type == TREE_NODE_VECTOR_CHARACTER) {
+                            symbol_data_type = SYMBOL_CHARACTER;
+                            symbol_kind = SYMBOL_VECTOR;
+                        }
+
+                        if (others == NULL) {
+                            others = symbol_parameters_create(symbol_data_type, symbol_kind);
+                        }
+                        else {
+                            symbol_parameters_add_parameter(others, symbol_data_type, symbol_kind);
+                        }
+                        right = tree_node_get_right(right);
+                    }
+
+                    int check = symbol_parameters_check(parameters,others);
+
+                    if (check == -1) {
+                        snprintf(message, sizeof(message), "Erro inesperado nos parametros da função '%s'", name);
+                        report_semantic_error(message, node);
+                    } else if (check == -2) {
+                        snprintf(message, sizeof(message), "Quantidade de parametros erradas na função '%s'", name);
+                        report_semantic_error(message, node);
+                    } else if (check != 0) {
+                        snprintf(message, sizeof(message), "Erro no tipo do parametro '%d' na função '%s'",check, name);
+                        report_semantic_error(message, node);
+                    }
+
                 }
                 else {
-                    snprintf(message, sizeof(message), "A variável '%s' devem ser do tipo 'inteiro' ou 'caractere'", name);
+                    snprintf(message, sizeof(message), "O identificador '%s' devem ser uma função", name);
                     report_semantic_error(message, node);
                 }
             }
 
             break;
 
+            break;
         case TREE_NODE_CARCONST:
             break;
 
         case TREE_NODE_INTCONST:
-            // TODO: Check if int const fit in a 32-bit integer
             break;
 
         case TREE_NODE_NOKIND:

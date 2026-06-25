@@ -162,7 +162,7 @@ const char* tree_node_get_lexeme(TreeNode* node) {
  *
  * @param node Tree node
  */
-void tree_node_set_type(TreeNode* node, TreeNodeDataType type) {
+void tree_node_set_data_type(TreeNode* node, TreeNodeDataType type) {
     if (node == NULL) {
         return;
     }

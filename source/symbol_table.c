@@ -178,7 +178,7 @@ void symbol_entry_delete(SymbolEntry* symbol) {
         return;
     }
 
-    symbol_parameters_delete(symbol);
+    symbol_parameters_delete(symbol->parameters);
     free_memory(symbol);
 }
 
@@ -218,7 +218,7 @@ const char* symbol_entry_get_name(SymbolEntry* symbol) {
  */
 SymbolKind symbol_entry_get_kind(SymbolEntry* symbol) {
     if (symbol == NULL) {
-        return NULL;
+        return SYMBOL_NOKIND;
     }
 
     return symbol->kind;
@@ -491,7 +491,8 @@ void symbol_scope_add_symbol(SymbolScope* symbol_scope, SymbolEntry* symbol) {
         return;
     }
 
-    symbol_scope->position++;
+    symbol->position = symbol_scope->position;
+    symbol_scope->position += symbol->amount;
 
     symbol_table_add_symbol(symbol_scope->symbol_table, symbol);
 }

@@ -6,10 +6,11 @@ FILES = memory            \
 		syntax_tree       \
 		symbol_table      \
 		semantic_analysis \
-		code_generation   \
 		lexer             \
 		parser            \
 		main
+
+#TODO: add code generation
 
 SOURCES = $(FILES:%=source/%.c)
 OBJECTS = $(FILES:%=objects/%.o)

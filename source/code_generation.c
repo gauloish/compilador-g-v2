@@ -324,7 +324,7 @@ void build_instructions(FILE* file, TreeNode* node, SymbolScope* scopes, Strings
                         symbol_scope_add_symbol(scopes, name, SYMBOL_CHARACTER);
                     }
 
-                    tree_node_set_type(node, type);
+                    tree_node_set_data_type(node, type);
                     node = tree_node_get_left(node);
                 }
             }
