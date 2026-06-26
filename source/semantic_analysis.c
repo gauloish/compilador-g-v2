@@ -51,7 +51,8 @@ void traverse_tree(TreeNode* node, SymbolScope* scopes) {
 
         case TREE_NODE_DECL_VAR_GLOBAIS:
             {
-                traverse_tree(tree_node_get_right(node),scopes);
+                traverse_tree(tree_node_get_left(node), scopes);
+                traverse_tree(tree_node_get_right(node), scopes);
             }
             break;
 
@@ -116,7 +117,8 @@ void traverse_tree(TreeNode* node, SymbolScope* scopes) {
                     if (symbol_scope_check_symbol(scopes, name, true)) {
                         snprintf(message, sizeof(message), "Variável '%s' já declarada nesse escopo", name);
                         report_semantic_error(message, node);
-                    } else {
+                    }
+                    else {
                         TreeNode* left = tree_node_get_left(node);
                         
                         SymbolDataType symbol_type;
@@ -133,7 +135,8 @@ void traverse_tree(TreeNode* node, SymbolScope* scopes) {
                             int amount = atoi(tree_node_get_lexeme(left));
 
                             symbol = symbol_entry_create(name, symbol_type, SYMBOL_VECTOR, NULL, 0, amount);
-                        } else {
+                        }
+                        else {
                             symbol = symbol_entry_create(name, symbol_type, SYMBOL_VARIABLE, NULL, 0, 1);
                         }
 
@@ -149,6 +152,7 @@ void traverse_tree(TreeNode* node, SymbolScope* scopes) {
 
         case TREE_NODE_DECL_FUNC:
             {
+                traverse_tree(tree_node_get_right(node), scopes);
                 traverse_tree(tree_node_get_left(node), scopes);
             }   
             break; 
@@ -836,8 +840,6 @@ void traverse_tree(TreeNode* node, SymbolScope* scopes) {
                     report_semantic_error(message, node);
                 }
             }
-
-            break;
 
             break;
         case TREE_NODE_CARCONST:

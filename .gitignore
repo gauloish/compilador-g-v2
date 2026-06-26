@@ -3,5 +3,5 @@ objects/*
 source/lexer.c
 source/parser.c
 assembly.s
-g-v1.exe
-g-v1
+g-v2.exe
+g-v2

@@ -88,7 +88,7 @@ Programa: DeclVarGlobais DeclFunc DeclPrograma {
     };
 
 DeclVarGlobais: GLOBAL VarSection {
-        tree = tree_node_create(
+        $$ = tree_node_create(
             TREE_NODE_DECL_VAR_GLOBAIS,
             TREE_NODE_NOTYPE,
             NULL,
@@ -99,7 +99,15 @@ DeclVarGlobais: GLOBAL VarSection {
         );
     }
     | %empty {
-        $$ = NULL;
+        $$ = tree_node_create(
+            TREE_NODE_DECL_VAR_GLOBAIS,
+            TREE_NODE_NOTYPE,
+            NULL,
+            NULL,
+            NULL,
+            0,
+            0
+        );
     }
 
 VarSection: '[' ListaDeclVar ']' {
@@ -232,15 +240,23 @@ DeclFunc: FUNCAO '[' IDENTIFICADOR '(' ListaParametros ')' ':' Tipo Bloco ListaF
         $$ = tree_node_create(
             TREE_NODE_DECL_FUNC,
             TREE_NODE_NOTYPE,
-            list_function,
             NULL,
+            list_function,
             NULL,
             @1.first_line,
             @1.first_column
         );
     }
     | %empty {
-        $$ = NULL;
+        $$ = tree_node_create(
+            TREE_NODE_DECL_FUNC,
+            TREE_NODE_NOTYPE,
+            NULL,
+            NULL,
+            NULL,
+            0,
+            0
+        );
     }
 
 ListaFuncoes: IDENTIFICADOR '(' ListaParametros ')' ':' Tipo Bloco ListaFuncoes {
